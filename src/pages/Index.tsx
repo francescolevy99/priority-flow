@@ -1,7 +1,18 @@
 import { useMemo, useState } from "react";
+import {
+  DndContext,
+  DragEndEvent,
+  DragOverlay,
+  DragStartEvent,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  closestCorners,
+} from "@dnd-kit/core";
 import { Plus, LayoutGrid } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { KanbanColumn } from "@/components/kanban/KanbanColumn";
+import { TaskCard } from "@/components/kanban/TaskCard";
 import { TaskDialog } from "@/components/kanban/TaskDialog";
 import { useTasks } from "@/hooks/useTasks";
 import type { Task, TaskStatus } from "@/types/task";
@@ -15,11 +26,18 @@ const COLUMNS: { status: TaskStatus; accent: string }[] = [
   { status: "done", accent: "bg-column-done" },
 ];
 
+const VALID_STATUSES: TaskStatus[] = ["todo", "pending", "done"];
+
 const Index = () => {
   const { tasks, addTask, updateTask, deleteTask, moveTask } = useTasks();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Task | null>(null);
   const [defaultStatus, setDefaultStatus] = useState<TaskStatus>("todo");
+  const [activeTask, setActiveTask] = useState<Task | null>(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
+  );
 
   const grouped = useMemo(() => {
     const sorted = [...tasks].sort((a, b) => {
@@ -50,6 +68,36 @@ const Index = () => {
     else addTask(data);
   };
 
+  const handleDragStart = (e: DragStartEvent) => {
+    const task = tasks.find((t) => t.id === e.active.id);
+    setActiveTask(task ?? null);
+  };
+
+  const handleDragEnd = (e: DragEndEvent) => {
+    setActiveTask(null);
+    const { active, over } = e;
+    if (!over) return;
+
+    const activeId = String(active.id);
+    const overId = String(over.id);
+    const activeTask = tasks.find((t) => t.id === activeId);
+    if (!activeTask) return;
+
+    // Drop su una colonna
+    if (VALID_STATUSES.includes(overId as TaskStatus)) {
+      if (activeTask.status !== overId) {
+        moveTask(activeId, overId as TaskStatus);
+      }
+      return;
+    }
+
+    // Drop su un'altra card -> assume lo stato di quella card
+    const overTask = tasks.find((t) => t.id === overId);
+    if (overTask && overTask.status !== activeTask.status) {
+      moveTask(activeId, overTask.status);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card">
@@ -61,7 +109,7 @@ const Index = () => {
             <div>
               <h1 className="text-xl font-semibold tracking-tight text-foreground">Kanban Board</h1>
               <p className="text-sm text-muted-foreground">
-                Organizza le tue attività per priorità e scadenza
+                Trascina le attività tra le colonne · ordinate per priorità e scadenza
               </p>
             </div>
           </div>
@@ -73,21 +121,32 @@ const Index = () => {
       </header>
 
       <main className="container py-8">
-        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {COLUMNS.map(({ status, accent }) => (
-            <KanbanColumn
-              key={status}
-              status={status}
-              title={STATUS_LABELS[status]}
-              accentClass={accent}
-              tasks={grouped[status]}
-              onAdd={openNew}
-              onEdit={openEdit}
-              onDelete={deleteTask}
-              onMove={moveTask}
-            />
-          ))}
-        </div>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCorners}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+        >
+          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+            {COLUMNS.map(({ status, accent }) => (
+              <KanbanColumn
+                key={status}
+                status={status}
+                title={STATUS_LABELS[status]}
+                accentClass={accent}
+                tasks={grouped[status]}
+                onAdd={openNew}
+                onEdit={openEdit}
+                onDelete={deleteTask}
+              />
+            ))}
+          </div>
+          <DragOverlay>
+            {activeTask ? (
+              <TaskCard task={activeTask} onEdit={() => {}} onDelete={() => {}} />
+            ) : null}
+          </DragOverlay>
+        </DndContext>
       </main>
 
       <TaskDialog

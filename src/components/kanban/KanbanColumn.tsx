@@ -1,4 +1,6 @@
 import { Plus } from "lucide-react";
+import { useDroppable } from "@dnd-kit/core";
+import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { Button } from "@/components/ui/button";
 import { TaskCard } from "./TaskCard";
 import { cn } from "@/lib/utils";
@@ -12,12 +14,22 @@ interface Props {
   onAdd: (status: TaskStatus) => void;
   onEdit: (task: Task) => void;
   onDelete: (id: string) => void;
-  onMove: (id: string, status: TaskStatus) => void;
 }
 
-export function KanbanColumn({ status, title, tasks, accentClass, onAdd, onEdit, onDelete, onMove }: Props) {
+export function KanbanColumn({ status, title, tasks, accentClass, onAdd, onEdit, onDelete }: Props) {
+  const { setNodeRef, isOver } = useDroppable({
+    id: status,
+    data: { type: "column", status },
+  });
+
   return (
-    <section className="flex h-full min-h-[60vh] flex-col rounded-xl border border-border bg-secondary/40 p-4">
+    <section
+      ref={setNodeRef}
+      className={cn(
+        "flex h-full min-h-[60vh] flex-col rounded-xl border border-border bg-secondary/40 p-4 transition-colors",
+        isOver && "border-primary/40 bg-primary/5"
+      )}
+    >
       <header className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className={cn("h-2.5 w-2.5 rounded-full", accentClass)} />
@@ -30,17 +42,17 @@ export function KanbanColumn({ status, title, tasks, accentClass, onAdd, onEdit,
           <Plus className="h-4 w-4" />
         </Button>
       </header>
-      <div className="flex flex-1 flex-col gap-3">
-        {tasks.length === 0 ? (
-          <div className="flex flex-1 items-center justify-center rounded-lg border-2 border-dashed border-border/60 p-6 text-center text-sm text-muted-foreground">
-            Nessuna attività
-          </div>
-        ) : (
-          tasks.map((t) => (
-            <TaskCard key={t.id} task={t} onEdit={onEdit} onDelete={onDelete} onMove={onMove} />
-          ))
-        )}
-      </div>
+      <SortableContext items={tasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
+        <div className="flex flex-1 flex-col gap-3">
+          {tasks.length === 0 ? (
+            <div className="flex flex-1 items-center justify-center rounded-lg border-2 border-dashed border-border/60 p-6 text-center text-sm text-muted-foreground">
+              Trascina qui o crea un'attività
+            </div>
+          ) : (
+            tasks.map((t) => <TaskCard key={t.id} task={t} onEdit={onEdit} onDelete={onDelete} />)
+          )}
+        </div>
+      </SortableContext>
     </section>
   );
 }

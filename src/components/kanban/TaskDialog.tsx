@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -17,6 +18,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
+import { formatDateLong } from "@/lib/date";
 import type { Task, TaskPriority, TaskStatus } from "@/types/task";
 
 interface Props {
@@ -38,9 +43,7 @@ export function TaskDialog({ open, onOpenChange, initial, defaultStatus = "todo"
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState<TaskPriority>("medium");
   const [status, setStatus] = useState<TaskStatus>(defaultStatus);
-  const [dueDate, setDueDate] = useState<string>(
-    new Date().toISOString().slice(0, 10)
-  );
+  const [dueDate, setDueDate] = useState<Date>(new Date());
 
   useEffect(() => {
     if (open) {
@@ -49,13 +52,13 @@ export function TaskDialog({ open, onOpenChange, initial, defaultStatus = "todo"
         setDescription(initial.description ?? "");
         setPriority(initial.priority);
         setStatus(initial.status);
-        setDueDate(initial.dueDate.slice(0, 10));
+        setDueDate(new Date(initial.dueDate));
       } else {
         setTitle("");
         setDescription("");
         setPriority("medium");
         setStatus(defaultStatus);
-        setDueDate(new Date().toISOString().slice(0, 10));
+        setDueDate(new Date());
       }
     }
   }, [open, initial, defaultStatus]);
@@ -67,7 +70,7 @@ export function TaskDialog({ open, onOpenChange, initial, defaultStatus = "todo"
       description: description.trim() || undefined,
       priority,
       status,
-      dueDate: new Date(dueDate).toISOString(),
+      dueDate: dueDate.toISOString(),
     });
     onOpenChange(false);
   };
@@ -128,13 +131,31 @@ export function TaskDialog({ open, onOpenChange, initial, defaultStatus = "todo"
             </div>
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="due">Data di scadenza</Label>
-            <Input
-              id="due"
-              type="date"
-              value={dueDate}
-              onChange={(e) => setDueDate(e.target.value)}
-            />
+            <Label>Data di scadenza</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !dueDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {dueDate ? formatDateLong(dueDate.toISOString()) : "Seleziona una data"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={dueDate}
+                  onSelect={(d) => d && setDueDate(d)}
+                  weekStartsOn={1}
+                  initialFocus
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
         <DialogFooter>
