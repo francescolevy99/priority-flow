@@ -31,8 +31,8 @@ All colors MUST be HSL.
     --column-pending: 38 92% 50%;
     --column-done: 142 71% 45%;
 
-    --shadow-card: 0 1px 3px 0 hsl(222 47% 11% / 0.06), 0 1px 2px 0 hsl(222 47% 11% / 0.04);
-    --shadow-card-hover: 0 10px 25px -5px hsl(222 47% 11% / 0.1), 0 4px 10px -3px hsl(222 47% 11% / 0.05);
+    --shadow-card: 0 1px 3px 0 hsla(222, 47%, 11%, 0.06), 0 1px 2px 0 hsla(222, 47%, 11%, 0.04);
+    --shadow-card-hover: 0 10px 25px -5px hsla(222, 47%, 11%, 0.1), 0 4px 10px -3px hsla(222, 47%, 11%, 0.05);
 
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
