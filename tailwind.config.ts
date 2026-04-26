@@ -57,7 +57,23 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        priority: {
+          high: "hsl(var(--priority-high))",
+          "high-bg": "hsl(var(--priority-high-bg))",
+          medium: "hsl(var(--priority-medium))",
+          "medium-bg": "hsl(var(--priority-medium-bg))",
+          low: "hsl(var(--priority-low))",
+          "low-bg": "hsl(var(--priority-low-bg))",
+        },
+        column: {
+          todo: "hsl(var(--column-todo))",
+          pending: "hsl(var(--column-pending))",
+          done: "hsl(var(--column-done))",
+        },
       },
+      boxShadow: {
+        card: "var(--shadow-card)",
+        "card-hover": "var(--shadow-card-hover)",
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
