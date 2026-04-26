@@ -8,17 +8,31 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 220 25% 97%;
+    --foreground: 222 47% 11%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 222 47% 11%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 222 47% 11%;
 
-    --primary: 222.2 47.4% 11.2%;
+    --primary: 221 83% 53%;
     --primary-foreground: 210 40% 98%;
+
+    --priority-high: 0 84% 60%;
+    --priority-high-bg: 0 86% 97%;
+    --priority-medium: 38 92% 50%;
+    --priority-medium-bg: 48 100% 96%;
+    --priority-low: 142 71% 45%;
+    --priority-low-bg: 138 76% 97%;
+
+    --column-todo: 221 83% 53%;
+    --column-pending: 38 92% 50%;
+    --column-done: 142 71% 45%;
+
+    --shadow-card: 0 1px 3px 0 hsl(222 47% 11% / 0.06), 0 1px 2px 0 hsl(222 47% 11% / 0.04);
+    --shadow-card-hover: 0 10px 25px -5px hsl(222 47% 11% / 0.1), 0 4px 10px -3px hsl(222 47% 11% / 0.05);
 
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
